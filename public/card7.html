@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>独处适应困扰-干预</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: "微软雅黑";}
+        body {background: #f5f7fa; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column;}
+        .container {background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); width: 600px; max-width: 95%;}
+        .container h2 {color: #333; margin-bottom: 30px; text-align: center;}
+        .option-item {margin-bottom: 15px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.2s;}
+        .option-item:hover {border-color: #409eff; background: #f5faff;}
+        .option-item.selected {border-color: #409eff; background: #e6f7ff; color: #409eff; font-weight: bold;}
+        .desc-text, .intervene-text, .behavior-text {line-height: 1.8; color: #666; font-size: 16px; margin-bottom: 30px; text-align: left;}
+        .behavior-text {
+            background: #f0f8ff;
+            padding: 15px;
+            border-left: 3px solid #409eff;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .btn-group {display: flex; justify-content: center; gap: 20px; margin-top: 30px; flex-wrap: wrap;}
+        .btn {padding: 10px 30px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; text-decoration: none; min-width: 120px; text-align: center;}
+        .btn-next {background: #409eff; color: white;}
+        .btn-next:hover {background: #337ecc;}
+        .btn-back {background: #f5f5f5; color: #666;}
+        .btn-back:hover {background: #eee;}
+        .btn-finish {background: #67c23a; color: white;}
+        .btn-finish:hover {background: #5eba2f;}
+        .step-tip {color: #999; margin-bottom: 20px; text-align: center;}
+        [disabled] {opacity: 0.6; cursor: not-allowed;}
+    </style>
+</head>
+<body>
+    <div class="container" id="step1">
+        <div class="step-tip">步骤1/3：选择你的情况</div>
+        <h2>独处适应困扰</h2>
+        <div class="option-item" 
+             data-option="独处时感到无聊空虚" 
+             data-desc="当我一个人独处时，总会觉得无所适从，心里空落落的，必须刷手机、找事做才能填补这种空虚，这种感受像独处时的自己没有办法和自己好好相处，需要外界的东西来支撑。
+<br>*你是否想过，独处是和自己对话的机会，并非只能靠外界填补空虚？
+" 
+             data-intervene="独处不是无聊的时光，而是和自己对话的机会，学会享受独处，能让自己更了解内心的需求，也能让身心得到真正的放松。"
+             data-behavior="尝试在独处时静坐3分钟，不看手机，只感受呼吸。">
+            1.独处时感到无聊空虚
+        </div>
+        <div class="option-item" 
+             data-option="独处时感到不安孤独" 
+             data-desc="当我一个人独处时，会不自觉地感到孤独和不安，总觉得需要有人陪伴才踏实，这种感受像自己无法独自面对自己的生活，过度依赖他人的陪伴来获得安全感。
+<br>*你是否想过，安全感本该源于自己，而非他人的时刻陪伴？" 
+             data-intervene="安全感的核心来源是自己，而非他人的陪伴，独处时的孤独只是一种情绪体验，并非 “被抛弃”，学会和自己相处，才能建立内在的安全感。"
+             data-behavior="不妨在独处时做一件小事取悦自己，比如泡一杯喜欢的饮品。">
+            2.独处时感到不安孤独
+        </div>
+        <div class="btn-group">
+            <a href="./主菜单页.html" class="btn btn-back">返回</a>
+            <button class="btn btn-next" id="toStep2" disabled>下一步</button>
+        </div>
+    </div>
+
+    <div class="container" id="step2" style="display: none;">
+        <div class="step-tip">步骤2/3：查看你的焦虑描述</div>
+        <h2>独处适应困扰</h2>
+        <p class="desc-text" id="descContent"></p>
+        <div class="btn-group">
+            <button class="btn btn-back" id="backToStep1">上一步</button>
+            <button class="btn btn-next" id="toStep3">下一步</button>
+        </div>
+    </div>
+
+    <div class="container" id="step3" style="display: none;">
+        <div class="step-tip">步骤3/3：认知重构与微小行动</div>
+        <h2>独处适应困扰</h2>
+        <p class="intervene-text" id="interveneContent"></p>
+        <p class="behavior-text" id="behaviorContent">💡 微小行为建议：</p>
+        <div class="btn-group">
+            <button class="btn btn-back" id="backToStep2">上一步</button>
+            <a href="./主菜单页.html" class="btn btn-finish">完成解锁，返回主菜单</a>
+        </div>
+    </div>
+
+    <script>
+        let selectedData = {option: '', desc: '', intervene: '', behavior: ''};
+        const optionItems = document.querySelectorAll('.option-item');
+        const toStep2Btn = document.getElementById('toStep2');
+
+        optionItems.forEach(item => {
+            item.addEventListener('click', function() {
+                optionItems.forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedData.option = this.dataset.option;
+                selectedData.desc = this.dataset.desc;
+                selectedData.intervene = this.dataset.intervene;
+                selectedData.behavior = this.dataset.behavior;
+                toStep2Btn.disabled = false;
+            });
+        });
+
+        toStep2Btn.addEventListener('click', function() {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('descContent').innerHTML = selectedData.desc;
+        });
+
+        document.getElementById('toStep3').addEventListener('click', function() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
+            document.getElementById('interveneContent').textContent = selectedData.intervene;
+            document.getElementById('behaviorContent').innerHTML = `💡 微小行为建议：${selectedData.behavior}`;
+            localStorage.setItem('card5Res', JSON.stringify(selectedData));
+        });
+
+        document.getElementById('backToStep1').addEventListener('click', function() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step1').style.display = 'block';
+        });
+
+        document.getElementById('backToStep2').addEventListener('click', function() {
+            document.getElementById('step3').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

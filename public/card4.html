@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社交邀约焦虑-干预</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: "微软雅黑";}
+        body {background: #f5f7fa; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column;}
+        .container {background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); width: 600px; max-width: 95%;}
+        .container h2 {color: #333; margin-bottom: 30px; text-align: center;}
+        .option-item {margin-bottom: 15px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.2s;}
+        .option-item:hover {border-color: #409eff; background: #f5faff;}
+        .option-item.selected {border-color: #409eff; background: #e6f7ff; color: #409eff; font-weight: bold;}
+        .desc-text, .intervene-text, .behavior-text {line-height: 1.8; color: #666; font-size: 16px; margin-bottom: 30px; text-align: left;}
+        .behavior-text {
+            background: #f0f8ff;
+            padding: 15px;
+            border-left: 3px solid #409eff;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .btn-group {display: flex; justify-content: center; gap: 20px; margin-top: 30px; flex-wrap: wrap;}
+        .btn {padding: 10px 30px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; text-decoration: none; min-width: 120px; text-align: center;}
+        .btn-next {background: #409eff; color: white;}
+        .btn-next:hover {background: #337ecc;}
+        .btn-back {background: #f5f5f5; color: #666;}
+        .btn-back:hover {background: #eee;}
+        .btn-finish {background: #67c23a; color: white;}
+        .btn-finish:hover {background: #5eba2f;}
+        .step-tip {color: #999; margin-bottom: 20px; text-align: center;}
+        [disabled] {opacity: 0.6; cursor: not-allowed;}
+    </style>
+</head>
+<body>
+    <div class="container" id="step1">
+        <div class="step-tip">步骤1/3：选择你的焦虑情况</div>
+        <h2>社交邀约焦虑</h2>
+        <div class="option-item" 
+             data-option="怕拒绝邀约后被孤立" 
+             data-desc="当我担心拒绝同学邀约后，会被大家疏远、彻底孤立时，我会盯着聊天框反复编辑又删除，这种感受像被全世界抛弃，我真正害怕的是没有朋友、被排除在集体之外。
+<br>*你是否想过，真正的朋友会理解你的状态，而非强迫你？" 
+             data-intervene="我的焦虑其实是把一次拒绝的后果无限放大了，我以为大家会因此讨厌我，却忽略了真正的朋友，从来不会因为这点小事就疏远我。"
+             data-behavior="不妨试着用“我今天有点累，下次再约呀”这样温和的方式拒绝，既表达自己的状态，也留了下次的余地，不用怕拒绝。">
+            1.怕拒绝邀约后被孤立
+        </div>
+        <div class="option-item" 
+             data-option="怕去了聚会后无法融入" 
+             data-desc="当我担心去了聚会，却融不进大家的话题、被冷落在角落时，我会脑补自己尴尬站在一旁的画面，这种感受像身处热闹却孤身一人，我真正害怕的是格格不入、无人在意。
+<br>*你是否想过，不用逼自己融入，做自己就好？" 
+             data-intervene="我的焦虑其实是把别人的看法看得太重了，我一直在意大家会不会不开心，却忘了自己的感受，才是最需要被重视的。
+<br>如果他人真心地想和我做朋友，一定想看到的是真正的自己。"
+             data-behavior="不妨试着提前想1个轻松的小话题（比如最近看的一部剧），聚会时不用逼自己融入，先找一个熟悉的同学聊两句就好。">
+            2.怕去了聚会后无法融入
+        </div>
+        <div class="btn-group">
+            <a href="./主菜单页.html" class="btn btn-back">返回</a>
+            <button class="btn btn-next" id="toStep2" disabled>下一步</button>
+        </div>
+    </div>
+
+    <div class="container" id="step2" style="display: none;">
+        <div class="step-tip">步骤2/3：查看你的焦虑描述</div>
+        <h2>社交邀约焦虑</h2>
+        <p class="desc-text" id="descContent"></p>
+        <div class="btn-group">
+            <button class="btn btn-back" id="backToStep1">上一步</button>
+            <button class="btn btn-next" id="toStep3">下一步</button>
+        </div>
+    </div>
+
+    <div class="container" id="step3" style="display: none;">
+        <div class="step-tip">步骤3/3：认知重构与微小行动</div>
+        <h2>社交邀约焦虑</h2>
+        <p class="intervene-text" id="interveneContent"></p>
+        <p class="behavior-text" id="behaviorContent">💡 微小行为建议：</p>
+        <div class="btn-group">
+            <button class="btn btn-back" id="backToStep2">上一步</button>
+            <a href="./主菜单页.html" class="btn btn-finish">完成解锁，返回主菜单</a>
+        </div>
+    </div>
+
+    <script>
+        let selectedData = {option: '', desc: '', intervene: '', behavior: ''};
+        const optionItems = document.querySelectorAll('.option-item');
+        const toStep2Btn = document.getElementById('toStep2');
+
+        optionItems.forEach(item => {
+            item.addEventListener('click', function() {
+                optionItems.forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedData.option = this.dataset.option;
+                selectedData.desc = this.dataset.desc;
+                selectedData.intervene = this.dataset.intervene;
+                selectedData.behavior = this.dataset.behavior;
+                toStep2Btn.disabled = false;
+            });
+        });
+
+        toStep2Btn.addEventListener('click', function() {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('descContent').innerHTML = selectedData.desc;
+        });
+
+        document.getElementById('toStep3').addEventListener('click', function() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
+            document.getElementById('interveneContent').textContent = selectedData.intervene;
+            document.getElementById('behaviorContent').innerHTML = `💡 微小行为建议：${selectedData.behavior}`;
+            localStorage.setItem('card4Res', JSON.stringify(selectedData));
+        });
+
+        document.getElementById('backToStep1').addEventListener('click', function() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step1').style.display = 'block';
+        });
+
+        document.getElementById('backToStep2').addEventListener('click', function() {
+            document.getElementById('step3').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

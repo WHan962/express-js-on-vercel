@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>焦虑干预程序-已解锁收藏</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: "微软雅黑";}
+        body {background: #f5f7fa; padding: 30px;}
+        .header {margin-bottom: 30px;}
+        .header .btn {padding: 8px 16px; background: #409eff; color: white; border: none; border-radius: 6px; cursor: pointer; text-decoration: none;}
+        .header .btn:hover {background: #337ecc;}
+        .collect-box {background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); margin-top: 20px;}
+        .collect-box h2 {color: #409eff; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee;}
+        .content-item {margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px;}
+        .content-item h3 {color: #333; margin-bottom: 10px; font-size: 18px;}
+        .content-item p {color: #666; line-height: 1.6; font-size: 16px; margin-bottom: 8px;}
+        .empty-tip {text-align: center; color: #999; font-size: 18px; padding: 50px 0;}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="主菜单页.html" class="btn" id="backToMenu">← 返回主菜单</a>
+    </div>
+    <h1>已解锁内容</h1>
+    <div id="collectContent"></div>
+
+    <script>
+        // ====================== 1. 收藏页统计功能（原有逻辑保留） ======================
+        const COLLECT_STATS_KEY = 'collectPageStatistics';
+        
+        function initStatistics() {
+            const defaultStats = {
+                visitCount: 0,
+                totalStayTime: 0,
+                lastEnterTime: 0,
+                stayRecords: []
+            };
+            const savedStats = localStorage.getItem(COLLECT_STATS_KEY);
+            return savedStats ? JSON.parse(savedStats) : defaultStats;
+        }
+        
+        function saveStatistics(stats) {
+            localStorage.setItem(COLLECT_STATS_KEY, JSON.stringify(stats));
+        }
+        
+        window.addEventListener('DOMContentLoaded', function() {
+            const stats = initStatistics();
+            stats.visitCount += 1;
+            stats.lastEnterTime = Date.now();
+            saveStatistics(stats);
+        });
+        
+        function calculateStayTime() {
+            const stats = initStatistics();
+            if (stats.lastEnterTime === 0) return;
+            
+            const singleStayTime = parseFloat(((Date.now() - stats.lastEnterTime) / 1000).toFixed(1));
+            stats.totalStayTime = parseFloat((stats.totalStayTime + singleStayTime).toFixed(1));
+            stats.lastEnterTime = 0;
+            stats.stayRecords.push({
+                visitTime: new Date().toLocaleString(),
+                stayTime: singleStayTime
+            });
+            saveStatistics(stats);
+            
+            // 计算完停留时长后，自动上报到服务器
+            reportStatsToServer(stats);
+        }
+        
+        window.addEventListener('beforeunload', calculateStayTime);
+        window.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                calculateStayTime();
+            } else {
+                const stats = initStatistics();
+                stats.lastEnterTime = Date.now();
+                saveStatistics(stats);
+            }
+        });
+        
+        window.getCollectStats = function() {
+            return initStatistics();
+        };
+
+        // ====================== 2. 新增：上报统计数据到服务器 ======================
+        // 替换成你的服务器IP和端口（即后端启动的地址）
+        const SERVER_API = 'http://express-js-on-vercel-theta-one-88.vercel.app/api/collect-stats';
+        
+        // 上报数据到后端接口
+        async function reportStatsToServer(stats) {
+            try {
+                const response = await fetch(SERVER_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        visitCount: stats.visitCount,
+                        totalStayTime: stats.totalStayTime,
+                        stayRecords: stats.stayRecords
+                    })
+                });
+                const result = await response.json();
+                console.log('数据上报结果：', result); // 调试用，可删除
+            } catch (err) {
+                console.error('数据上报失败：', err); // 调试用，可删除
+            }
+        }
+
+        // 额外：点击「返回主菜单」时也上报一次（确保数据不丢失）
+        document.getElementById('backToMenu').addEventListener('click', function() {
+            const stats = initStatistics();
+            calculateStayTime(); // 先计算本次停留时长
+            reportStatsToServer(stats); // 再上报
+        });
+
+        // ====================== 3. 原有：收藏页展示功能（完全保留） ======================
+        window.onload = function() {
+            const unlockedCards = JSON.parse(localStorage.getItem('unlockedCards')) || [];
+            const collectContent = document.getElementById('collectContent');
+
+            const cardNames = {
+                1: '小组作业焦虑',
+                2: '未来规划焦虑',
+                3: '学业任务焦虑',
+                4: '社交邀约焦虑',
+                5: '宿舍关系焦虑',
+                6: '情绪表达顾虑',
+                7: '独处适应困扰',
+                8: '自我缺点接纳',
+                9: '日常情绪感知',
+                10: '人际边界建立',
+                11: '自我关照忽视',
+                12: '生活节律梳理',
+            };
+
+            if (unlockedCards.length === 0) {
+                collectContent.innerHTML = '<div class="empty-tip">暂无解锁内容，快去主菜单翻卡吧！</div>';
+                return;
+            }
+
+            unlockedCards.forEach(cardId => {
+                const res = JSON.parse(localStorage.getItem(`card${cardId}Res`)) || {};
+                const item = document.createElement('div');
+                item.className = 'collect-box';
+                item.innerHTML = `
+                    <h2>${cardNames[cardId] || `卡片${cardId}`}</h2>
+                    <div class="content-item">
+                        <h3>你的焦虑情况</h3>
+                        <p>${res.option}</p>
+                    </div>
+                    <div class="content-item">
+                        <h3>焦虑描述</h3>
+                        <p>${res.desc}</p>
+                    </div>
+                    <div class="content-item">
+                        <h3>认知干预内容</h3>
+                        <p>${res.intervene}</p>
+                    </div>
+                    <div class="content-item">
+                        <h3>微小行为建议</h3>
+                        <p>${res.behavior}</p>
+                    </div>
+                `;
+                collectContent.appendChild(item);
+            });
+        };
+    </script>
+</body>
+</html>

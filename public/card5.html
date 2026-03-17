@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宿舍关系焦虑-干预</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: "微软雅黑";}
+        body {background: #f5f7fa; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column;}
+        .container {background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); width: 600px; max-width: 95%;}
+        .container h2 {color: #333; margin-bottom: 30px; text-align: center;}
+        .option-item {margin-bottom: 15px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.2s;}
+        .option-item:hover {border-color: #409eff; background: #f5faff;}
+        .option-item.selected {border-color: #409eff; background: #e6f7ff; color: #409eff; font-weight: bold;}
+        .desc-text, .intervene-text, .behavior-text {line-height: 1.8; color: #666; font-size: 16px; margin-bottom: 30px; text-align: left;}
+        .behavior-text {
+            background: #f0f8ff;
+            padding: 15px;
+            border-left: 3px solid #409eff;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .btn-group {display: flex; justify-content: center; gap: 20px; margin-top: 30px; flex-wrap: wrap;}
+        .btn {padding: 10px 30px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; text-decoration: none; min-width: 120px; text-align: center;}
+        .btn-next {background: #409eff; color: white;}
+        .btn-next:hover {background: #337ecc;}
+        .btn-back {background: #f5f5f5; color: #666;}
+        .btn-back:hover {background: #eee;}
+        .btn-finish {background: #67c23a; color: white;}
+        .btn-finish:hover {background: #5eba2f;}
+        .step-tip {color: #999; margin-bottom: 20px; text-align: center;}
+        [disabled] {opacity: 0.6; cursor: not-allowed;}
+    </style>
+</head>
+<body>
+    <div class="container" id="step1">
+        <div class="step-tip">步骤1/3：选择你的焦虑情况</div>
+        <h2>宿舍关系焦虑</h2>
+        <div class="option-item" 
+             data-option="怕自己的行为被舍友嫌弃排斥" 
+             data-desc="当我担心自己做的事情太吵被舍友嫌弃，甚至被彻底排斥时，我会连翻书都小心翼翼，不敢发出一点声音，这种感受像在宿舍里没有容身之地，我真正害怕的是被孤立、无人接纳。
+<br>*你是否想过，直接沟通比脑补更能解决问题？而他人，或许并没有那么抗拒沟通？" 
+             data-intervene="从舍友们的角度看，我的焦虑其实是太过敏感多疑了，把舍友的一个无心眼神、一句随意的话，都无限放大成了针对自己的恶意，自己吓自己。"
+             data-behavior="不妨试着主动和舍友问一句“我做这些的声音会不会吵到你？”，直接沟通比脑补更有效，舍友大概率只会说“没事/稍微小点就好”。">
+            1.怕自己的行为被舍友嫌弃排斥
+        </div>
+        <div class="option-item" 
+             data-option="怕宿舍关系变糟糕" 
+             data-desc="当我担心因为一点小事，就让宿舍关系变得紧张，再也回不到以前的和谐时，我会忍不住反复回想自己的言行，这种感受像手里攥着易碎的玻璃，我真正害怕的是破坏了这份美好。
+<br>*你是否想过，轻松而直接的互动比过度谨慎更能维系关系？" 
+             data-intervene="从舍友们的角度看，我的焦虑其实是让我刻意疏远了大家，我忘了沟通才是解决误会的关键，很多问题，只要说开了，就迎刃而解。"
+             data-behavior="不妨试着和舍友分享1个小零食，或者随口聊1句今天的小事，轻松的互动能化解不必要的紧张，不用过度担心。">
+            2.怕宿舍关系变糟糕
+        </div>
+        <div class="btn-group">
+            <a href="./主菜单页.html" class="btn btn-back">返回</a>
+            <button class="btn btn-next" id="toStep2" disabled>下一步</button>
+        </div>
+    </div>
+
+    <div class="container" id="step2" style="display: none;">
+        <div class="step-tip">步骤2/3：查看你的焦虑描述</div>
+        <h2>宿舍关系焦虑</h2>
+        <p class="desc-text" id="descContent"></p>
+        <div class="btn-group">
+            <button class="btn btn-back" id="backToStep1">上一步</button>
+            <button class="btn btn-next" id="toStep3">下一步</button>
+        </div>
+    </div>
+
+    <div class="container" id="step3" style="display: none;">
+        <div class="step-tip">步骤3/3：认知重构与微小行动</div>
+        <h2>宿舍关系焦虑</h2>
+        <p class="intervene-text" id="interveneContent"></p>
+        <p class="behavior-text" id="behaviorContent">💡 微小行为建议：</p>
+        <div class="btn-group">
+            <button class="btn btn-back" id="backToStep2">上一步</button>
+            <a href="./主菜单页.html" class="btn btn-finish">完成解锁，返回主菜单</a>
+        </div>
+    </div>
+
+    <script>
+        let selectedData = {option: '', desc: '', intervene: '', behavior: ''};
+        const optionItems = document.querySelectorAll('.option-item');
+        const toStep2Btn = document.getElementById('toStep2');
+
+        optionItems.forEach(item => {
+            item.addEventListener('click', function() {
+                optionItems.forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedData.option = this.dataset.option;
+                selectedData.desc = this.dataset.desc;
+                selectedData.intervene = this.dataset.intervene;
+                selectedData.behavior = this.dataset.behavior;
+                toStep2Btn.disabled = false;
+            });
+        });
+
+        toStep2Btn.addEventListener('click', function() {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('descContent').innerHTML = selectedData.desc;
+        });
+
+        document.getElementById('toStep3').addEventListener('click', function() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
+            document.getElementById('interveneContent').textContent = selectedData.intervene;
+            document.getElementById('behaviorContent').innerHTML = `💡 微小行为建议：${selectedData.behavior}`;
+            localStorage.setItem('card5Res', JSON.stringify(selectedData));
+        });
+
+        document.getElementById('backToStep1').addEventListener('click', function() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step1').style.display = 'block';
+        });
+
+        document.getElementById('backToStep2').addEventListener('click', function() {
+            document.getElementById('step3').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

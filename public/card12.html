@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生活节律梳理-干预</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: "微软雅黑";}
+        body {background: #f5f7fa; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column;}
+        .container {background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); width: 600px; max-width: 95%;}
+        .container h2 {color: #333; margin-bottom: 30px; text-align: center;}
+        .option-item {margin-bottom: 15px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.2s;}
+        .option-item:hover {border-color: #409eff; background: #f5faff;}
+        .option-item.selected {border-color: #409eff; background: #e6f7ff; color: #409eff; font-weight: bold;}
+        .desc-text, .intervene-text, .behavior-text {line-height: 1.8; color: #666; font-size: 16px; margin-bottom: 30px; text-align: left;}
+        .behavior-text {
+            background: #f0f8ff;
+            padding: 15px;
+            border-left: 3px solid #409eff;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .btn-group {display: flex; justify-content: center; gap: 20px; margin-top: 30px; flex-wrap: wrap;}
+        .btn {padding: 10px 30px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; text-decoration: none; min-width: 120px; text-align: center;}
+        .btn-next {background: #409eff; color: white;}
+        .btn-next:hover {background: #337ecc;}
+        .btn-back {background: #f5f5f5; color: #666;}
+        .btn-back:hover {background: #eee;}
+        .btn-finish {background: #67c23a; color: white;}
+        .btn-finish:hover {background: #5eba2f;}
+        .step-tip {color: #999; margin-bottom: 20px; text-align: center;}
+        [disabled] {opacity: 0.6; cursor: not-allowed;}
+    </style>
+</head>
+<body>
+    <div class="container" id="step1">
+        <div class="step-tip">步骤1/3：选择你的情况</div>
+        <h2>生活节律梳理</h2>
+        <div class="option-item" 
+             data-option="放任自身的无规律作息" 
+             data-desc="当没有强制要求时，我会放任自己熬夜、睡懒觉，作息毫无规律，虽然一时觉得自由，却总让身体处于昏沉状态，这种感受像生活被“随意”主导，忽略了作息对身心的基础影响。
+<br>*你是否想过，规律作息不是束缚，而是让身心更舒适的、更简单的方式？" 
+             data-intervene="规律的作息并非“束缚”，而是让身心保持稳定状态的基础。适度的规律，能让身体更舒适、精神更饱满，无需追求极致的作息，只需建立适合自己的简单规律，就是对生活的用心梳理。"
+             data-behavior="考虑每天固定一个入睡时间，并且提前10分钟放下手机。">
+            1.放任自身的无规律作息
+        </div>
+        <div class="option-item" 
+             data-option="做事忽略简单的节奏把控" 
+             data-desc="当同时做几件小事时，我会毫无节奏地乱做，比如一边写作业一边刷手机，最后一件事都没做好，还觉得身心俱疲，这种感受像被事情牵着走，忽略了做事的简单节奏。
+<br>*你是否想过，只要安排好节奏，一次只做一件事，既能高效，又能让内心远离杂乱的感觉？" 
+             data-intervene="做事的简单节奏并非“刻板规划”，而是对自己行为的适度把控。学会一件事、一件事地做，给每件事留专属的时间，既能提高做事效率，也能让自己远离杂乱的感受，这是梳理生活节律的基础。"
+             data-behavior="尝试一次只做一件事，做完再开始下一件。">
+            2.做事忽略简单的节奏把控
+        </div>
+        <div class="btn-group">
+            <a href="./主菜单页.html" class="btn btn-back">返回</a>
+            <button class="btn btn-next" id="toStep2" disabled>下一步</button>
+        </div>
+    </div>
+
+    <div class="container" id="step2" style="display: none;">
+        <div class="step-tip">步骤2/3：查看你的焦虑描述</div>
+        <h2>生活节律梳理</h2>
+        <p class="desc-text" id="descContent"></p>
+        <div class="btn-group">
+            <button class="btn btn-back" id="backToStep1">上一步</button>
+            <button class="btn btn-next" id="toStep3">下一步</button>
+        </div>
+    </div>
+
+    <div class="container" id="step3" style="display: none;">
+        <div class="step-tip">步骤3/3：认知重构与微小行动</div>
+        <h2>生活节律梳理</h2>
+        <p class="intervene-text" id="interveneContent"></p>
+        <p class="behavior-text" id="behaviorContent">💡 微小行为建议：</p>
+        <div class="btn-group">
+            <button class="btn btn-back" id="backToStep2">上一步</button>
+            <a href="./主菜单页.html" class="btn btn-finish">完成解锁，返回主菜单</a>
+        </div>
+    </div>
+
+    <script>
+        let selectedData = {option: '', desc: '', intervene: '', behavior: ''};
+        const optionItems = document.querySelectorAll('.option-item');
+        const toStep2Btn = document.getElementById('toStep2');
+
+        optionItems.forEach(item => {
+            item.addEventListener('click', function() {
+                optionItems.forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedData.option = this.dataset.option;
+                selectedData.desc = this.dataset.desc;
+                selectedData.intervene = this.dataset.intervene;
+                selectedData.behavior = this.dataset.behavior;
+                toStep2Btn.disabled = false;
+            });
+        });
+
+        toStep2Btn.addEventListener('click', function() {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('descContent').innerHTML = selectedData.desc;
+        });
+
+        document.getElementById('toStep3').addEventListener('click', function() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
+            document.getElementById('interveneContent').textContent = selectedData.intervene;
+            document.getElementById('behaviorContent').innerHTML = `💡 微小行为建议：${selectedData.behavior}`;
+            localStorage.setItem('card5Res', JSON.stringify(selectedData));
+        });
+
+        document.getElementById('backToStep1').addEventListener('click', function() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step1').style.display = 'block';
+        });
+
+        document.getElementById('backToStep2').addEventListener('click', function() {
+            document.getElementById('step3').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>干预程序-登录</title>
+    <style>
+        /* 页面样式，小白不用改，直接用 */
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: "微软雅黑";}
+        body {background: #f5f7fa; display: flex; justify-content: center; align-items: center; min-height: 100vh;}
+        .login-box {background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); width: 400px;}
+        .login-box h1 {text-align: center; color: #333; margin-bottom: 30px; font-size: 24px;}
+        .input-item {margin-bottom: 20px;}
+        .input-item label {display: block; margin-bottom: 8px; color: #666; font-size: 16px;}
+        .input-item input {width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px;}
+        #submit-btn {width: 100%; padding: 12px; background: #409eff; color: white; border: none; border-radius: 6px; font-size: 18px; cursor: pointer;}
+        #submit-btn:hover {background: #337ecc;}
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h1>干预程序-用户登录</h1>
+        <div class="input-item">
+            <label for="group">你的组别</label>
+            <input type="text" id="group" placeholder="例：01/02，如不确定，请咨询主试" required>
+        </div>
+        <div class="input-item">
+            <label for="number">你的编号</label>
+            <input type="text" id="number" placeholder="例：01/02/03" required>
+        </div>
+        <button id="submit-btn">提交进入程序</button>
+    </div>
+
+    <script>
+        // 提交按钮点击事件，小白不用改
+        document.getElementById('submit-btn').onclick = function() {
+            // 获取填写的组别和编号
+            const group = document.getElementById('group').value.trim();
+            const number = document.getElementById('number').value.trim();
+            // 验证是否填写
+            if (!group || !number) {
+                alert('请填写完整的组别和编号！');
+                return;
+            }
+            // 保存到浏览器，永久有效，再次打开不用填
+            localStorage.setItem('userGroup', group);
+            localStorage.setItem('userNumber', number);
+            // 跳转到主菜单页
+            window.location.href = 'menu.html';
+        };
+
+        // 若已填写过，直接跳转到主菜单
+        window.onload = function() {
+            if (localStorage.getItem('userGroup') && localStorage.getItem('userNumber')) {
+                window.location.href = 'menu.html';
+            }
+        };
+    </script>
+</body>
+</html>

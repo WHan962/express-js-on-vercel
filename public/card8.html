@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自我缺点接纳-干预</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: "微软雅黑";}
+        body {background: #f5f7fa; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column;}
+        .container {background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); width: 600px; max-width: 95%;}
+        .container h2 {color: #333; margin-bottom: 30px; text-align: center;}
+        .option-item {margin-bottom: 15px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.2s;}
+        .option-item:hover {border-color: #409eff; background: #f5faff;}
+        .option-item.selected {border-color: #409eff; background: #e6f7ff; color: #409eff; font-weight: bold;}
+        .desc-text, .intervene-text, .behavior-text {line-height: 1.8; color: #666; font-size: 16px; margin-bottom: 30px; text-align: left;}
+        .behavior-text {
+            background: #f0f8ff;
+            padding: 15px;
+            border-left: 3px solid #409eff;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .btn-group {display: flex; justify-content: center; gap: 20px; margin-top: 30px; flex-wrap: wrap;}
+        .btn {padding: 10px 30px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; text-decoration: none; min-width: 120px; text-align: center;}
+        .btn-next {background: #409eff; color: white;}
+        .btn-next:hover {background: #337ecc;}
+        .btn-back {background: #f5f5f5; color: #666;}
+        .btn-back:hover {background: #eee;}
+        .btn-finish {background: #67c23a; color: white;}
+        .btn-finish:hover {background: #5eba2f;}
+        .step-tip {color: #999; margin-bottom: 20px; text-align: center;}
+        [disabled] {opacity: 0.6; cursor: not-allowed;}
+    </style>
+</head>
+<body>
+    <div class="container" id="step1">
+        <div class="step-tip">步骤1/3：选择你的情况</div>
+        <h2>自我缺点接纳</h2>
+        <div class="option-item" 
+             data-option="因为一些小缺点纠结自我" 
+             data-desc="当我想到自己的小缺点，比如路痴、轻微马虎、唱歌跑调这类无伤大雅的问题时，会忍不住纠结，觉得这些小缺点让自己变得不完美，这种感受像盯着白纸上的小墨点，忽略了整张纸的干净。
+<br>*你是否想过，小缺点让人格更鲜活，不会折损你的核心价值？" 
+             data-intervene="从客观视角看，每个人都有无伤大雅的小缺点，这些缺点不会影响个人的核心价值，反而让人格更鲜活、真实。如果能接纳这些小缺点，才是真正的自我接纳。"
+             data-behavior="每天对着镜子说一句“我接纳自己的（哪些小缺点）”。">
+            1.因为一些小缺点纠结自我
+        </div>
+        <div class="option-item" 
+             data-option="刻意隐藏自身的小缺点" 
+             data-desc="当和他人相处时，我会刻意隐藏自己的小缺点，怕别人发现后对自己有不好的印象。这种感受像戴着面具相处，无法让别人看到真实的自己，也让自己处于不必要的拘谨中。
+<br>*你是否想过，他人其实也能感知到我的辛苦。比起完美的面具，真实的相处更能让人感到轻松自在？" 
+             data-intervene="在我的朋友看来，真正的相处从来都不是靠“完美形象”维持。他人并不会因一些小缺点而否定你，坦然展现真实的自己，才能建立轻松、真诚的关系，也能让自己更自在。"
+             data-behavior="可以主动向朋友说一个自己的小缺点，比如“我有点路痴”。">
+            2.刻意隐藏自身的小缺点
+        </div>
+        <div class="btn-group">
+            <a href="./主菜单页.html" class="btn btn-back">返回</a>
+            <button class="btn btn-next" id="toStep2" disabled>下一步</button>
+        </div>
+    </div>
+
+    <div class="container" id="step2" style="display: none;">
+        <div class="step-tip">步骤2/3：查看你的焦虑描述</div>
+        <h2>自我缺点接纳</h2>
+        <p class="desc-text" id="descContent"></p>
+        <div class="btn-group">
+            <button class="btn btn-back" id="backToStep1">上一步</button>
+            <button class="btn btn-next" id="toStep3">下一步</button>
+        </div>
+    </div>
+
+    <div class="container" id="step3" style="display: none;">
+        <div class="step-tip">步骤3/3：认知重构与微小行动</div>
+        <h2>自我缺点接纳</h2>
+        <p class="intervene-text" id="interveneContent"></p>
+        <p class="behavior-text" id="behaviorContent">💡 微小行为建议：</p>
+        <div class="btn-group">
+            <button class="btn btn-back" id="backToStep2">上一步</button>
+            <a href="./主菜单页.html" class="btn btn-finish">完成解锁，返回主菜单</a>
+        </div>
+    </div>
+
+    <script>
+        let selectedData = {option: '', desc: '', intervene: '', behavior: ''};
+        const optionItems = document.querySelectorAll('.option-item');
+        const toStep2Btn = document.getElementById('toStep2');
+
+        optionItems.forEach(item => {
+            item.addEventListener('click', function() {
+                optionItems.forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedData.option = this.dataset.option;
+                selectedData.desc = this.dataset.desc;
+                selectedData.intervene = this.dataset.intervene;
+                selectedData.behavior = this.dataset.behavior;
+                toStep2Btn.disabled = false;
+            });
+        });
+
+        toStep2Btn.addEventListener('click', function() {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('descContent').innerHTML = selectedData.desc;
+        });
+
+        document.getElementById('toStep3').addEventListener('click', function() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
+            document.getElementById('interveneContent').textContent = selectedData.intervene;
+            document.getElementById('behaviorContent').innerHTML = `💡 微小行为建议：${selectedData.behavior}`;
+            localStorage.setItem('card5Res', JSON.stringify(selectedData));
+        });
+
+        document.getElementById('backToStep1').addEventListener('click', function() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step1').style.display = 'block';
+        });
+
+        document.getElementById('backToStep2').addEventListener('click', function() {
+            document.getElementById('step3').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
