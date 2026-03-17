@@ -1,52 +1,38 @@
-import express from 'express'
-import path from 'path'
-import { fileURLToPath } from 'url'
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const cors = require('cors');
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-const app = express()
+const STATS_FILE = path.join(__dirname, 'stats.json');
 
-// Home route - HTML
-app.get('/', (req, res) => {
-  res.type('html').send(`
-    <!doctype html>
-    <html>
-      <head>
-        <meta charset="utf-8"/>
-        <title>Express on Vercel</title>
-        <link rel="stylesheet" href="/style.css" />
-      </head>
-      <body>
-        <nav>
-          <a href="/">Home</a>
-          <a href="/about">About</a>
-          <a href="/api-data">API Data</a>
-          <a href="/healthz">Health</a>
-        </nav>
-        <h1>Welcome to Express on Vercel 🚀</h1>
-        <p>This is a minimal example without a database or forms.</p>
-        <img src="/logo.png" alt="Logo" width="120" />
-      </body>
-    </html>
-  `)
-})
+if (!fs.existsSync(STATS_FILE)) {
+  fs.writeFileSync(STATS_FILE, JSON.stringify([], null, 2), 'utf8');
+}
 
-app.get('/about', function (req, res) {
-  res.sendFile(path.join(__dirname, '..', 'components', 'about.htm'))
-})
+app.post('/api/collect-stats', (req, res) => {
+  try {
+    const userStats = {
+      userId: req.body.userId || `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      visitCount: req.body.visitCount,
+      totalStayTime: req.body.totalStayTime,
+      stayRecords: req.body.stayRecords,
+      reportTime: new Date().toLocaleString()
+    };
 
-// Example API endpoint - JSON
-app.get('/api-data', (req, res) => {
-  res.json({
-    message: 'Here is some sample API data',
-    items: ['apple', 'banana', 'cherry'],
-  })
-})
+    const existingData = JSON.parse(fs.readFileSync(STATS_FILE, 'utf8'));
+    existingData.push(userStats);
+    fs.writeFileSync(STATS_FILE, JSON.stringify(existingData, null, 2), 'utf8');
 
-// Health check
-app.get('/healthz', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() })
-})
+    res.status(200).json({ success: true, message: '数据上报成功' });
+  } catch (err) {
+    console.error('数据存储失败：', err);
+    res.status(500).json({ success: false, message: '数据上报失败' });
+  }
+});
 
-export default app
+// 【唯一改动：适配Vercel】删掉原来的 app.listen，改成导出 app
+module.exports = app;
