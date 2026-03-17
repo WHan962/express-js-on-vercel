@@ -1,10 +1,11 @@
-app.use(express.static('public'));
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+// ✅ 加上这行！托管 public 里的网页
+app.use(express.static('public'));
 
 // 用“内存”临时存数据（重启会清，但能看到数据是否收集到）
 let tempData = [];
